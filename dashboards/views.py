@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from blogs import context_processors
 from blogs.models import Blog, Category
-from .forms import CategoryForm, BlogPostForm
+from .forms import CategoryForm, BlogPostForm,AddUserForm,EditUserForm
 
 from django.template.defaultfilters import slugify
 
@@ -121,3 +121,34 @@ def delete_post(request, pk):
     post.delete()
     return redirect('posts')
 
+def add_user(request):
+    if request.method == 'POST':
+        form = AddUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('users')
+        else:
+            print('form is invalid')
+            print(form.errors)
+    form = AddUserForm()
+    context = {'form': form}
+    return render(request, 'dashboard/add_user.html', context)
+
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('users')
+        else:
+            print('form is invalid')
+            print(form.errors)
+    form = EditUserForm(instance=user)
+    context = {'form': form, 'user': user}
+    return render(request, 'dashboard/edit_user.html', context)
+
+def delete_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    user.delete()
+    return redirect('users')
